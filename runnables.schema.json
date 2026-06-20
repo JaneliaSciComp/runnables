@@ -1,0 +1,496 @@
+{
+  "$defs": {
+    "AppEntryPoint": {
+      "description": "An entry point (command) within an app",
+      "properties": {
+        "id": {
+          "description": "Unique identifier for the entry point",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "description": "Display name of the entry point",
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "default": "job",
+          "description": "Whether this is a batch job or long-running service",
+          "enum": [
+            "job",
+            "service"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of the entry point",
+          "title": "Description"
+        },
+        "command": {
+          "description": "The base CLI command to execute",
+          "title": "Command",
+          "type": "string"
+        },
+        "parameters": {
+          "default": [],
+          "description": "Parameters for this entry point",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/AppParameter"
+              },
+              {
+                "$ref": "#/$defs/AppParameterSection"
+              }
+            ]
+          },
+          "title": "Parameters",
+          "type": "array"
+        },
+        "resources": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AppResourceDefaults"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Default resource requirements"
+        },
+        "env": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Default environment variables",
+          "title": "Env"
+        },
+        "pre_run": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Script to run before the main command",
+          "title": "Pre Run"
+        },
+        "post_run": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Script to run after the main command",
+          "title": "Post Run"
+        },
+        "conda_env": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Conda environment name or path to activate before running",
+          "title": "Conda Env"
+        },
+        "container": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Container image URL for Apptainer (e.g. 'ghcr.io/org/image:tag')",
+          "title": "Container"
+        },
+        "bind_paths": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Additional paths to bind-mount into the container",
+          "title": "Bind Paths"
+        },
+        "container_args": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Default extra arguments for container exec (e.g. '--nv')",
+          "title": "Container Args"
+        },
+        "requirements": {
+          "default": [],
+          "description": "Required tools for this entry point, e.g. ['apptainer']. Merged with manifest-level requirements.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Requirements",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "command"
+      ],
+      "title": "AppEntryPoint",
+      "type": "object"
+    },
+    "AppParameter": {
+      "description": "A parameter definition for an app entry point",
+      "properties": {
+        "flag": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "CLI flag syntax (e.g. '--outdir', '-n'). Omit for positional arguments.",
+          "title": "Flag"
+        },
+        "name": {
+          "description": "Display name of the parameter",
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "description": "The data type of the parameter",
+          "enum": [
+            "string",
+            "integer",
+            "number",
+            "boolean",
+            "file",
+            "directory",
+            "enum"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of the parameter",
+          "title": "Description"
+        },
+        "required": {
+          "default": false,
+          "description": "Whether the parameter is required",
+          "title": "Required",
+          "type": "boolean"
+        },
+        "default": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Default value for the parameter",
+          "title": "Default"
+        },
+        "options": {
+          "anyOf": [
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Allowed values for enum type",
+          "title": "Options"
+        },
+        "min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Minimum value for numeric types",
+          "title": "Min"
+        },
+        "max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Maximum value for numeric types",
+          "title": "Max"
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regex validation pattern for string types",
+          "title": "Pattern"
+        },
+        "hidden": {
+          "default": false,
+          "description": "Whether the parameter is hidden by default in the UI",
+          "title": "Hidden",
+          "type": "boolean"
+        },
+        "raw": {
+          "default": false,
+          "description": "If true, value is appended to the command without shell quoting",
+          "title": "Raw",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "type"
+      ],
+      "title": "AppParameter",
+      "type": "object"
+    },
+    "AppParameterSection": {
+      "description": "A collapsible section that groups parameters in the UI",
+      "properties": {
+        "section": {
+          "description": "Section title",
+          "title": "Section",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "collapsed": {
+          "default": false,
+          "title": "Collapsed",
+          "type": "boolean"
+        },
+        "parameters": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AppParameter"
+          },
+          "title": "Parameters",
+          "type": "array"
+        }
+      },
+      "required": [
+        "section"
+      ],
+      "title": "AppParameterSection",
+      "type": "object"
+    },
+    "AppResourceDefaults": {
+      "description": "Resource defaults for an app entry point",
+      "properties": {
+        "cpus": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Number of CPUs",
+          "title": "Cpus"
+        },
+        "memory": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Memory allocation (e.g. '16 GB')",
+          "title": "Memory"
+        },
+        "walltime": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Wall time limit (e.g. '04:00')",
+          "title": "Walltime"
+        },
+        "queue": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cluster queue/partition name",
+          "title": "Queue"
+        }
+      },
+      "title": "AppResourceDefaults",
+      "type": "object"
+    }
+  },
+  "description": "Top-level app manifest (runnables.yaml)",
+  "properties": {
+    "name": {
+      "description": "Display name of the app",
+      "title": "Name",
+      "type": "string"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Description of the app",
+      "title": "Description"
+    },
+    "repo_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "GitHub repo URL where the tool code lives. If absent, uses the repo containing this manifest.",
+      "title": "Repo Url"
+    },
+    "requirements": {
+      "default": [],
+      "description": "Required tools, e.g. ['pixi>=0.40', 'npm']",
+      "items": {
+        "type": "string"
+      },
+      "title": "Requirements",
+      "type": "array"
+    },
+    "runnables": {
+      "description": "Available entry points for this app",
+      "items": {
+        "$ref": "#/$defs/AppEntryPoint"
+      },
+      "title": "Runnables",
+      "type": "array"
+    }
+  },
+  "required": [
+    "name",
+    "runnables"
+  ],
+  "title": "AppManifest",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fileglancer.org/schemas/runnables.schema.json"
+}
